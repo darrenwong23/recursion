@@ -3,7 +3,7 @@
 
 // but you're not, so you'll write it from scratch:
 
-// note: ( logic heavily borrowed from:
+// note: ( code heavily borrowed from:
 // http://oreilly.com/javascript/excerpts/javascript-good-parts/json.html)
 // Did not include reviver
 
@@ -14,8 +14,6 @@ var parseJSON = function(json) {
   var at, // index of current character (is actually +1?)
       ch, // current character
       text,
-      value, // place holder for value function
-      white, // function that skips whitespace
       escapee = {
         '"':  '"',
         '\\': '\\',
@@ -215,53 +213,43 @@ var parseJSON = function(json) {
       }
 
 
+      }, 
+
+      value = function() {
+        white();
+        switch (ch) {
+          case '{':
+            return object();
+          case '[':
+            return array();
+          case '"':
+            return string();
+          case '-':
+            return number();
+          default:
+            return ch >= '0' && ch <= '9' ? number() : word();     
+        }
+      },
+
+      //skip whitespace
+      white = function() {
+        while( ch && ch <= ' ') {
+          next();
+        }
       };
 
-  value = function() {
-    white();
-    switch (ch) {
-      case '{':
-        return object();
-      case '[':
-        return array();
-      case '"':
-        return string();
-      case '-':
-        return number();
-      default:
-        return ch >= '0' && ch <= '9' ? number() : word();     
-    }
-  };
-
-  //skip whitespace
-  white = function() {
-    while( ch && ch <= ' ') {
-      next();
-    }
-  };
-
   
-   var mainFunction = function(source, reviver) {
+   var mainFunction = function(json) {
 
     var result;
-
-    text = source;
+    text = json;
     at = 0;
     ch = ' ';
     result = value();
-
     white();
     if(ch) {
       error("Syntax error");
     }
-    /*
-    return typeof reviver === 'function' ?
-      //if reviver is a function
-      function walk(holder, key) {
-        var k, v, value = holder[key];
-
-      }({"": result}, "") : result;*/
-
       return result;
   };
 
